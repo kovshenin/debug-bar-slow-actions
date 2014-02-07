@@ -48,7 +48,7 @@ class Debug_Bar_Slow_Actions {
 	}
 
 	function debug_bar_panels( $panels ) {
-		require_once( 'class-debug-bar-slow-actions-panel.php' );
+		require_once( dirname( __FILE__ ) . '/class-debug-bar-slow-actions-panel.php' );
 		$panel = new Debug_Bar_Slow_Actions_Panel( 'Slow Actions' );
 		$panel->set_callback( array( $this, 'panel_callback' ) );
 		$panels[] = $panel;
