@@ -126,6 +126,9 @@ class Debug_Bar_Slow_Actions {
 			.debug-bar-actions-list tr:hover {
 				background: #e8e8e8;
 			}
+			.debug-bar-actions-list th {
+				font-weight: 600;
+			}
 
 			#db-slow-actions-container h3 {
 				float: none;
