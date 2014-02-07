@@ -12,14 +12,11 @@ class Debug_Bar_Slow_Actions {
 	public $start;
 	public $flow;
 
-	public $warning_threshold = 100;
-
 	function __construct() {
 		$this->start = microtime( true );
 		$this->flow = array();
 
 		ob_start( array( $this, 'ob_callback' ) );
-		// add_action( 'shutdown', array( $this, 'shutdown' ) );
 
 		add_action( 'all', array( $this, 'time_start' ) );
 		add_filter( 'debug_bar_panels', array( $this, 'debug_bar_panels' ) );
@@ -33,7 +30,7 @@ class Debug_Bar_Slow_Actions {
 				'time' => array(),
 			);
 
-			// @todo: add support for nesting filters.
+			// @todo: add support for nesting filters, see #17817
 			add_action( current_filter(), array( $this, 'time_stop' ), 9000 );
 		}
 
@@ -52,8 +49,8 @@ class Debug_Bar_Slow_Actions {
 
 	function debug_bar_panels( $panels ) {
 		require_once( 'class-debug-bar-slow-actions-panel.php' );
-		$panel = new Debug_Bar_Slow_Actions_Panel();
-		$panel->set_tab( 'Slow Actions', array( $this, 'panel_callback' ) );
+		$panel = new Debug_Bar_Slow_Actions_Panel( 'Slow Actions' );
+		$panel->set_callback( array( $this, 'panel_callback' ) );
 		$panels[] = $panel;
 		return $panels;
 	}
@@ -87,9 +84,9 @@ class Debug_Bar_Slow_Actions {
 		uasort( $this->flow, array( $this, 'sort_actions_by_time' ) );
 		$slowest_action = reset( $this->flow );
 
-		$table = '<table class="debug-bar-actions-list" style="width: 100%;">';
+		$table = '<table class="debug-bar-actions-list">';
 		$table .= '<tr>';
-		$table .= '<th style="text-align: left;">Action or Filter</th>';
+		$table .= '<th>Action or Filter</th>';
 		$table .= '<th style="text-align: right;">Calls</th>';
 		$table .= '<th style="text-align: right;">Per Call</th>';
 		$table .= '<th style="text-align: right;">Total</th>';
@@ -112,13 +109,14 @@ class Debug_Bar_Slow_Actions {
 
 		$output .= '<div class="clear"></div>';
 		$output .= '<h3>Slow Actions</h3>';
-		// $output .= '<p>This table shows the top 100 slowest actions during this page load, the number of times each action was called, and the total execution time of each action. Note that nested action calls timing is currently not supported.</p>';
+
 		$output .= $table;
 
 		$output .= '
 		<style>
 			.debug-bar-actions-list {
 				border-spacing: 0;
+				width: 100%;
 			}
 			.debug-bar-actions-list td,
 			.debug-bar-actions-list th {
@@ -140,10 +138,6 @@ class Debug_Bar_Slow_Actions {
 		</style>';
 
 		return $output;
-	}
-
-	function shutdown() {
-		print_r( $this->flow );
 	}
 
 	function ob_callback( $buffer ) {
