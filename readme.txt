@@ -14,7 +14,7 @@ Easily find out which actions and filters are the slowest during a page load.
 
 This plugin lists the top 100 slowest actions and filters during a page request in WordPress. It helps you figure out performance bottlenecks in themes and plugins.
 
-Requires [http://wordpress.org/plugins/debug-bar/ Debug Bar].
+Requires [Debug Bar](http://wordpress.org/plugins/debug-bar/ "Debug Bar").
 
 == Screenshots ==
 
