@@ -108,6 +108,9 @@ class Debug_Bar_Slow_Actions {
 						}
 
 						$this->flow[ $action ]['callbacks'][ $priority ] = sprintf( '%s::%s', $object_or_class, $method );
+					} elseif ( is_object( $callback['function'] ) ) {
+						// Probably an anonymous function.
+						$this->flow[ $action ]['callbacks'][ $priority ] = get_class( $callback['function'] );
 					} else {
 						$this->flow[ $action ]['callbacks'][ $priority ] = $callback['function'];
 					}
