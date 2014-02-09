@@ -60,10 +60,12 @@ class Debug_Bar_Slow_Actions {
 		// Hack wp_footer: this callback is executed late into wp_footer, but not after, so
 		// let's assume it is the last call in wp_footer and manually stop the timer, otherwise
 		// we won't get a wp_footer entry in the output.
-		$time = array_pop( $this->flow['wp_footer']['stack'] );
-		if ( $time ) {
-			$time['stop'] = microtime( true );
-			array_push( $this->flow['wp_footer']['time'], $time );
+		if ( ! empty( $this->flow['wp_footer']['stack'] ) ) {
+			$time = array_pop( $this->flow['wp_footer']['stack'] );
+			if ( $time && empty( $time['stop'] ) ) {
+				$time['stop'] = microtime( true );
+				array_push( $this->flow['wp_footer']['time'], $time );
+			}
 		}
 
 		printf( '<div id="dbsa-container">%s</div>', $this->output() );
