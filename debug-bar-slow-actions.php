@@ -123,8 +123,8 @@ class Debug_Bar_Slow_Actions {
 		$table = '<table>';
 		$table .= '<tr>';
 		$table .= '<th>Action or Filter</th>';
-		$table .= '<th style="text-align: right;">Calls</th>';
 		$table .= '<th style="text-align: right;">Callbacks</th>';
+		$table .= '<th style="text-align: right;">Calls</th>';
 		$table .= '<th style="text-align: right;">Per Call</th>';
 		$table .= '<th style="text-align: right;">Total</th>';
 		$table .= '</tr>';
@@ -139,8 +139,8 @@ class Debug_Bar_Slow_Actions {
 
 			$table .= '<tr>';
 			$table .= sprintf( '<td><span class="dbsa-action">%s</span> %s</td>', $action, $callbacks );
-			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['count'] );
 			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['callbacks_count'] );
+			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['count'] );
 			$table .= sprintf( '<td style="text-align: right;">%.2fms</td>', $data['total'] / $data['count'] );
 			$table .= sprintf( '<td style="text-align: right;">%.2fms</td>', $data['total'] );
 			$table .= '</tr>';
