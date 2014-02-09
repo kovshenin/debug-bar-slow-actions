@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Debug Bar Slow Actions
  * Description: Easily find the slowest actions and filters during a page request.
- * Version: 0.7
+ * Version: 0.8-alpha
  * Author: Konstantin Kovshenin
  * Author URI: http://kovshenin.com
  * License: GPLv2 or later
@@ -16,10 +16,9 @@ class Debug_Bar_Slow_Actions {
 		$this->start = microtime( true );
 		$this->flow = array();
 
-		ob_start( array( $this, 'ob_callback' ) );
-
 		add_action( 'all', array( $this, 'time_start' ) );
-		add_filter( 'debug_bar_panels', array( $this, 'debug_bar_panels' ) );
+		add_filter( 'debug_bar_panels', array( $this, 'debug_bar_panels' ), 9000 );
+		// add_action( 'wp_footer', function() { print_r( $this->flow ); }, 9000 );
 	}
 
 	function time_start() {
@@ -56,7 +55,17 @@ class Debug_Bar_Slow_Actions {
 	}
 
 	function panel_callback() {
-		echo '<div id="db-slow-actions-container">%%debug-bar-slow-actions-placeholder%%</div>';
+
+		// Hack wp_footer: this callback is executed late into wp_footer, but not after, so
+		// let's assume it is the last call in wp_footer and manually stop the timer, otherwise
+		// we won't get a wp_footer entry in the output.
+		$time = array_pop( $this->flow['wp_footer']['stack'] );
+		if ( $time ) {
+			$time['stop'] = microtime( true );
+			array_push( $this->flow['wp_footer']['time'], $time );
+		}
+
+		printf( '<div id="db-slow-actions-container">%s</div>', $this->output() );
 	}
 
 	function sort_actions_by_time( $a, $b ) {
@@ -141,11 +150,6 @@ class Debug_Bar_Slow_Actions {
 		</style>';
 
 		return $output;
-	}
-
-	function ob_callback( $buffer ) {
-		$buffer = str_replace( '%%debug-bar-slow-actions-placeholder%%', $this->output(), $buffer );
-		return $buffer;
 	}
 }
 new Debug_Bar_Slow_Actions;
