@@ -66,7 +66,7 @@ class Debug_Bar_Slow_Actions {
 			array_push( $this->flow['wp_footer']['time'], $time );
 		}
 
-		printf( '<div id="db-slow-actions-container">%s</div>', $this->output() );
+		printf( '<div id="dbsa-container">%s</div>', $this->output() );
 	}
 
 	function sort_actions_by_time( $a, $b ) {
@@ -116,7 +116,7 @@ class Debug_Bar_Slow_Actions {
 		uasort( $this->flow, array( $this, 'sort_actions_by_time' ) );
 		$slowest_action = reset( $this->flow );
 
-		$table = '<table class="debug-bar-actions-list">';
+		$table = '<table>';
 		$table .= '<tr>';
 		$table .= '<th>Action or Filter</th>';
 		$table .= '<th style="text-align: right;">Calls</th>';
@@ -126,15 +126,15 @@ class Debug_Bar_Slow_Actions {
 		$table .= '</tr>';
 
 		foreach ( array_slice( $this->flow, 0, 100 ) as $action => $data ) {
-			// $callbacks = print_r( $data['callbacks'], true );
-			$callbacks = '<ol>';
+
+			$callbacks = '<ol class="dbsa-callbacks">';
 			foreach ( $data['callbacks'] as $priority => $callback ) {
 				$callbacks .= sprintf( '<li value="%d">%s</li>', $priority, $callback );
 			}
 			$callbacks .= '</ol>';
 
 			$table .= '<tr>';
-			$table .= sprintf( '<td><span class="dbsa-action">%s</span> <div class="db-slow-actions-callbacks">%s</div></td>', $action, $callbacks );
+			$table .= sprintf( '<td><span class="dbsa-action">%s</span> %s</td>', $action, $callbacks );
 			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['count'] );
 			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['callbacks_count'] );
 			$table .= sprintf( '<td style="text-align: right;">%.2fms</td>', $data['total'] / $data['count'] );
@@ -155,41 +155,41 @@ class Debug_Bar_Slow_Actions {
 
 		$output .= <<<EOD
 		<style>
-			.debug-bar-actions-list {
+			#dbsa-container table {
 				border-spacing: 0;
 				width: 100%;
 			}
-			.debug-bar-actions-list td,
-			.debug-bar-actions-list th {
+			#dbsa-container td,
+			#dbsa-container th {
 				padding: 6px;
 				border-bottom: solid 1px #ddd;
 			}
-			.debug-bar-actions-list td {
+			#dbsa-container td {
 				font: 12px Monaco, 'Courier New', Courier, Fixed !important;
 				line-height: 180% !important;
 				cursor: pointer;
 			}
-			.debug-bar-actions-list tr:hover {
+			#dbsa-container tr:hover {
 				background: #e8e8e8;
 			}
-			.debug-bar-actions-list th {
+			#dbsa-container th {
 				font-weight: 600;
 			}
-			#db-slow-actions-container h3 {
+			#dbsa-container h3 {
 				float: none;
 				clear: both;
 				font-family: georgia, times, serif;
 				font-size: 22px;
 				margin: 15px 10px 15px 0 !important;
 			}
-			#db-slow-actions-container .db-slow-actions-callbacks ol {
+			ol.dbsa-callbacks {
 				list-style: decimal;
 				padding-left: 50px;
 				color: #777;
 				margin-top: 10px;
 				display: none;
 			}
-			#db-slow-actions-container .debug-bar-actions-list .dbsa-expanded .db-slow-actions-callbacks ol {
+			.dbsa-expanded ol.dbsa-callbacks {
 				display: block;
 			}
 			.dbsa-action:before {
@@ -210,7 +210,7 @@ EOD;
 		$output .= <<<EOD
 		<script>
 			(function($){
-				$( '.debug-bar-actions-list td' ).on( 'click', function() {
+				$('#dbsa-container td').on('click', function() {
 					$(this).parents('tr').toggleClass('dbsa-expanded');
 				});
 			}(jQuery));
