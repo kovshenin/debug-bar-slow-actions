@@ -27,6 +27,7 @@ class Debug_Bar_Slow_Actions {
 				'count' => 0,
 				'stack' => array(),
 				'time' => array(),
+				'callbacks' => array(),
 			);
 
 			// @todo: add support for nesting filters, see #17817
@@ -76,6 +77,8 @@ class Debug_Bar_Slow_Actions {
 	}
 
 	function output() {
+		global $wp_filter;
+
 		$output = '';
 		$total_actions = 0;
 		$total_actions_time = 0;
@@ -88,6 +91,26 @@ class Debug_Bar_Slow_Actions {
 			$this->flow[ $action ]['total'] = $total;
 			$total_actions_time += $total;
 			$total_actions += $data['count'];
+
+			$this->flow[ $action ]['callbacks_count'] = 0;
+
+			// Add all filter callbacks.
+			foreach ( $wp_filter[ $action ] as $priority => $callbacks ) {
+				if ( ! isset( $this->flow[ $action ]['callbacks'][ $priority ] ) ) {
+					$this->flow[ $action ]['callbacks'][ $priority ] = array();
+				}
+
+				foreach ( $callbacks as $callback ) {
+					if ( is_array( $callback['function'] ) && count( $callback['function'] == 2 ) ) {
+						list( $object, $method ) = $callback['function'];
+						$this->flow[ $action ]['callbacks'][ $priority ] = sprintf( '%s::%s', get_class( $object ), $method );
+					} else {
+						$this->flow[ $action ]['callbacks'][ $priority ] = $callback['function'];
+					}
+
+					$this->flow[ $action ]['callbacks_count']++;
+				}
+			}
 		}
 
 		uasort( $this->flow, array( $this, 'sort_actions_by_time' ) );
@@ -97,14 +120,23 @@ class Debug_Bar_Slow_Actions {
 		$table .= '<tr>';
 		$table .= '<th>Action or Filter</th>';
 		$table .= '<th style="text-align: right;">Calls</th>';
+		$table .= '<th style="text-align: right;">Callbacks</th>';
 		$table .= '<th style="text-align: right;">Per Call</th>';
 		$table .= '<th style="text-align: right;">Total</th>';
 		$table .= '</tr>';
 
 		foreach ( array_slice( $this->flow, 0, 100 ) as $action => $data ) {
+			// $callbacks = print_r( $data['callbacks'], true );
+			$callbacks = '<ol>';
+			foreach ( $data['callbacks'] as $priority => $callback ) {
+				$callbacks .= sprintf( '<li value="%d">%s</li>', $priority, $callback );
+			}
+			$callbacks .= '</ol>';
+
 			$table .= '<tr>';
-			$table .= sprintf( '<td>%s</td>', $action );
+			$table .= sprintf( '<td><span class="dbsa-action">%s</span> <div class="db-slow-actions-callbacks">%s</div></td>', $action, $callbacks );
 			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['count'] );
+			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['callbacks_count'] );
 			$table .= sprintf( '<td style="text-align: right;">%.2fms</td>', $data['total'] / $data['count'] );
 			$table .= sprintf( '<td style="text-align: right;">%.2fms</td>', $data['total'] );
 			$table .= '</tr>';
@@ -121,7 +153,7 @@ class Debug_Bar_Slow_Actions {
 
 		$output .= $table;
 
-		$output .= '
+		$output .= <<<EOD
 		<style>
 			.debug-bar-actions-list {
 				border-spacing: 0;
@@ -132,13 +164,17 @@ class Debug_Bar_Slow_Actions {
 				padding: 6px;
 				border-bottom: solid 1px #ddd;
 			}
+			.debug-bar-actions-list td {
+				font: 12px Monaco, 'Courier New', Courier, Fixed !important;
+				line-height: 180% !important;
+				cursor: pointer;
+			}
 			.debug-bar-actions-list tr:hover {
 				background: #e8e8e8;
 			}
 			.debug-bar-actions-list th {
 				font-weight: 600;
 			}
-
 			#db-slow-actions-container h3 {
 				float: none;
 				clear: both;
@@ -146,8 +182,40 @@ class Debug_Bar_Slow_Actions {
 				font-size: 22px;
 				margin: 15px 10px 15px 0 !important;
 			}
-
-		</style>';
+			#db-slow-actions-container .db-slow-actions-callbacks ol {
+				list-style: decimal;
+				padding-left: 50px;
+				color: #777;
+				margin-top: 10px;
+				display: none;
+			}
+			#db-slow-actions-container .debug-bar-actions-list .dbsa-expanded .db-slow-actions-callbacks ol {
+				display: block;
+			}
+			.dbsa-action:before {
+				content: '\\f140';
+				display: inline-block;
+				-webkit-font-smoothing: antialiased;
+				font: normal 20px/1 'dashicons';
+				vertical-align: top;
+				color: #aaa;
+				margin-right: 4px;
+				margin-left: -6px;
+			}
+			.dbsa-expanded .dbsa-action:before {
+				content: '\\f142';
+			}
+		</style>
+EOD;
+		$output .= <<<EOD
+		<script>
+			(function($){
+				$( '.debug-bar-actions-list td' ).on( 'click', function() {
+					$(this).parents('tr').toggleClass('dbsa-expanded');
+				});
+			}(jQuery));
+		</script>
+EOD;
 
 		return $output;
 	}
