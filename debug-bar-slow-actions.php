@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Debug Bar Slow Actions
  * Description: Easily find the slowest actions and filters during a page request.
- * Version: 0.8
+ * Version: 0.8.1
  * Author: Konstantin Kovshenin
  * Author URI: http://kovshenin.com
  * License: GPLv2 or later
