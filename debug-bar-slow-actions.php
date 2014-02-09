@@ -102,8 +102,12 @@ class Debug_Bar_Slow_Actions {
 
 				foreach ( $callbacks as $callback ) {
 					if ( is_array( $callback['function'] ) && count( $callback['function'] == 2 ) ) {
-						list( $object, $method ) = $callback['function'];
-						$this->flow[ $action ]['callbacks'][ $priority ] = sprintf( '%s::%s', get_class( $object ), $method );
+						list( $object_or_class, $method ) = $callback['function'];
+						if ( is_object( $object_or_class ) ) {
+							$object_or_class = get_class( $object_or_class );
+						}
+
+						$this->flow[ $action ]['callbacks'][ $priority ] = sprintf( '%s::%s', $object_or_class, $method );
 					} else {
 						$this->flow[ $action ]['callbacks'][ $priority ] = $callback['function'];
 					}
