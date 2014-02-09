@@ -107,12 +107,12 @@ class Debug_Bar_Slow_Actions {
 							$object_or_class = get_class( $object_or_class );
 						}
 
-						$this->flow[ $action ]['callbacks'][ $priority ] = sprintf( '%s::%s', $object_or_class, $method );
+						$this->flow[ $action ]['callbacks'][ $priority ][] = sprintf( '%s::%s', $object_or_class, $method );
 					} elseif ( is_object( $callback['function'] ) ) {
 						// Probably an anonymous function.
-						$this->flow[ $action ]['callbacks'][ $priority ] = get_class( $callback['function'] );
+						$this->flow[ $action ]['callbacks'][ $priority ][] = get_class( $callback['function'] );
 					} else {
-						$this->flow[ $action ]['callbacks'][ $priority ] = $callback['function'];
+						$this->flow[ $action ]['callbacks'][ $priority ][] = $callback['function'];
 					}
 
 					$this->flow[ $action ]['callbacks_count']++;
@@ -134,14 +134,16 @@ class Debug_Bar_Slow_Actions {
 
 		foreach ( array_slice( $this->flow, 0, 100 ) as $action => $data ) {
 
-			$callbacks = '<ol class="dbsa-callbacks">';
-			foreach ( $data['callbacks'] as $priority => $callback ) {
-				$callbacks .= sprintf( '<li value="%d">%s</li>', $priority, $callback );
+			$callbacks_output = '<ol class="dbsa-callbacks">';
+			foreach ( $data['callbacks'] as $priority => $callbacks ) {
+				foreach ( $callbacks as $callback ) {
+					$callbacks_output .= sprintf( '<li value="%d">%s</li>', $priority, $callback );
+				}
 			}
-			$callbacks .= '</ol>';
+			$callbacks_output .= '</ol>';
 
 			$table .= '<tr>';
-			$table .= sprintf( '<td><span class="dbsa-action">%s</span> %s</td>', $action, $callbacks );
+			$table .= sprintf( '<td><span class="dbsa-action">%s</span> %s</td>', $action, $callbacks_output );
 			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['callbacks_count'] );
 			$table .= sprintf( '<td style="text-align: right;">%d</td>', $data['count'] );
 			$table .= sprintf( '<td style="text-align: right;">%.2fms</td>', $data['total'] / $data['count'] );
@@ -175,6 +177,7 @@ class Debug_Bar_Slow_Actions {
 				font: 12px Monaco, 'Courier New', Courier, Fixed !important;
 				line-height: 180% !important;
 				cursor: pointer;
+				vertical-align: top;
 			}
 			#dbsa-container tr:hover {
 				background: #e8e8e8;
