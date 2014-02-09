@@ -22,6 +22,11 @@ Requires [Debug Bar](http://wordpress.org/plugins/debug-bar/ "Debug Bar").
 
 == Changelog ==
 
+= 0.8.1 =
+* Add support for closure/anonymous functions
+* Show all callbacks hooked to each priority
+* Fix minor styles
+
 = 0.8 =
 * Code cleanup
 * Use wp_footer for output instead of output buffering
