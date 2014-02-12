@@ -4,7 +4,7 @@ Donate Link: http://kovshenin.com/beer/
 Tags: debug, actions, profiling
 Requires at least: 3.8
 Tested up to: 3.8
-Stable tag: 0.8.1
+Stable tag: 0.8.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,9 @@ Current limitations:
 1. Screenshot
 
 == Changelog ==
+
+= 0.8.2 =
+* Fix a couple warnings/notices
 
 = 0.8.1 =
 * Add support for closure/anonymous functions
