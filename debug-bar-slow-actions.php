@@ -38,7 +38,7 @@ class Debug_Bar_Slow_Actions {
 		array_push( $this->flow[ current_filter() ]['stack'], array( 'start' => microtime( true ) ) );
 	}
 
-	function time_stop( $value ) {
+	function time_stop( $value = null ) {
 		$time = array_pop( $this->flow[ current_filter() ]['stack'] );
 		$time['stop'] = microtime( true );
 		array_push( $this->flow[ current_filter() ]['time'], $time );
