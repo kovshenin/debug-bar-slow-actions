@@ -26,7 +26,7 @@ class Debug_Bar_Slow_Actions {
 			$this->flow[ current_filter() ] = array(
 				'count' => 0,
 				'stack' => array(),
-				'time' => array(),
+				'time' => 0,
 				'callbacks' => array(),
 			);
 
@@ -34,14 +34,13 @@ class Debug_Bar_Slow_Actions {
 			add_action( current_filter(), array( $this, 'time_stop' ), 9000 );
 		}
 
-		$count = ++$this->flow[ current_filter() ]['count'];
-		array_push( $this->flow[ current_filter() ]['stack'], array( 'start' => microtime( true ) ) );
+		++$this->flow[ current_filter() ]['count'];
+		array_push( $this->flow[ current_filter() ]['stack'], microtime( true ) );
 	}
 
 	function time_stop( $value = null ) {
 		$time = array_pop( $this->flow[ current_filter() ]['stack'] );
-		$time['stop'] = microtime( true );
-		array_push( $this->flow[ current_filter() ]['time'], $time );
+		$this->flow[ current_filter() ]['time'] += microtime( true ) - $time;
 
 		// In case this was a filter.
 		return $value;
@@ -86,9 +85,7 @@ class Debug_Bar_Slow_Actions {
 		$total_actions_time = 0;
 
 		foreach ( $this->flow as $action => $data ) {
-			$total = 0;
-			foreach ( $data['time'] as $time )
-				$total += ( $time['stop'] - $time['start'] ) * 1000;
+			$total = $data['time'] * 1000;
 
 			$this->flow[ $action ]['total'] = $total;
 			$total_actions_time += $total;
