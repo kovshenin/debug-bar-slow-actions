@@ -16,8 +16,8 @@ class Debug_Bar_Slow_Actions {
 		$this->start = microtime( true );
 		$this->flow = array();
 
-		add_action( 'all', array( $this, 'time_start' ) );
-		add_filter( 'debug_bar_panels', array( $this, 'debug_bar_panels' ), 9000 );
+		add_action( 'all', array( &$this, 'time_start' ), -1 );
+		add_filter( 'debug_bar_panels', array( &$this, 'debug_bar_panels' ), 9000 );
 		// add_action( 'wp_footer', function() { print_r( $this->flow ); }, 9000 );
 	}
 
@@ -31,7 +31,7 @@ class Debug_Bar_Slow_Actions {
 			);
 
 			// @todo: add support for nesting filters, see #17817
-			add_action( current_filter(), array( $this, 'time_stop' ), 9000 );
+			add_action( current_filter(), array( &$this, 'time_stop' ), 999999999 );
 		}
 
 		$count = ++$this->flow[ current_filter() ]['count'];
