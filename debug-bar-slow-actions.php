@@ -61,9 +61,8 @@ class Debug_Bar_Slow_Actions {
 		// we won't get a wp_footer entry in the output.
 		if ( ! empty( $this->flow['wp_footer']['stack'] ) ) {
 			$time = array_pop( $this->flow['wp_footer']['stack'] );
-			if ( $time && empty( $time['stop'] ) ) {
-				$time['stop'] = microtime( true );
-				array_push( $this->flow['wp_footer']['time'], $time );
+			if ( $time ) {
+                $this->flow['wp_footer']['time'] += microtime( true );
 			}
 		}
 
