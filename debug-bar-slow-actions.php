@@ -42,6 +42,9 @@ class Debug_Bar_Slow_Actions {
 		$time = array_pop( $this->flow[ current_filter() ]['stack'] );
 		$time['stop'] = microtime( true );
 		array_push( $this->flow[ current_filter() ]['time'], $time );
+		
+		// Clean after stopping timer
+		remove_action( current_filter(), array( $this, 'time_stop' ), 9000 );
 
 		// In case this was a filter.
 		return $value;
@@ -93,9 +96,13 @@ class Debug_Bar_Slow_Actions {
 			$this->flow[ $action ]['total'] = $total;
 			$total_actions_time += $total;
 			$total_actions += $data['count'];
-
+			
 			$this->flow[ $action ]['callbacks_count'] = 0;
 
+			if ( ! isset( $wp_filter[ $action ] ) ) {
+				continue;
+			}
+			
 			// Add all filter callbacks.
 			foreach ( $wp_filter[ $action ] as $priority => $callbacks ) {
 				if ( ! isset( $this->flow[ $action ]['callbacks'][ $priority ] ) ) {
